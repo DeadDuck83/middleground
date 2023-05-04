@@ -1,0 +1,11 @@
+// .image {
+//     border: 1px solid green;
+// }
+
+.image {
+    width: 100%;
+    height: 165px;
+    object-fit: cover;
+    object-position: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}

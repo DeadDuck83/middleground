@@ -1,0 +1,16 @@
+export const preferenceArray = [
+  { name: 'Restaurant', type: 'restaurant' },
+  { name: 'Bar', type: 'bar' },
+  { name: 'Cafe', type: 'cafe' },
+  { name: 'Grocery Store', type: 'grocery_or_supermarket' },
+  { name: 'Shopping Mall', type: 'shopping_mall' },
+  { name: 'Park', type: 'park' },
+  { name: 'Lodging', type: 'lodging' },
+  { name: 'Gym', type: 'gym' },
+  { name: 'Movie Theater', type: 'movie_theater' },
+  { name: 'Museum', type: 'museum' },
+  { name: 'Night Club', type: 'night_club' },
+  { name: 'Library', type: 'library' },
+  { name: 'Hospital', type: 'hospital' },
+  { name: 'Gas Station', type: 'gas_station' },
+];
