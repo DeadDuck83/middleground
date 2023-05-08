@@ -166,7 +166,7 @@ const Mapping: FC<PageProps> = ({ params }) => {
                 latitude={latitude}
                 longitude={longitude}
                 radius={radius[0]}
-                preferences={preferences}
+                // preferences={preferences}
                 setDestinationOptions={setDestinationOptions}
               />
             )}

@@ -19,7 +19,7 @@ interface GoogleMapComponentProps {
   latitude: number;
   longitude: number;
   radius: number;
-  preferences: PreferenceOption[] | [];
+  preferences?: PreferenceOption[] | [];
   setDestinationOptions: (destinationOptions: any) => void;
 }
 
