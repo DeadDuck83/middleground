@@ -14,112 +14,95 @@ import {
 import ResponsiveBox from '@/components/ResponsiveBox/ResponsiveBox';
 
 import InputWithButtonRow from '@/components/InputWithButtonRow/InputWithButtonRow';
-import { EventData } from '@/types/types';
+import { CreateEvent } from '@/types/types';
 import Navigation from '@/components/Navigation/Navigation';
 import { useMutation } from 'react-query';
 import BodyComponent from '@/components/BodyComponent/BodyComponent';
-import { useDemoApi } from '../hooks/useDemoApi';
+import { createEvent } from '../lib/api';
 import PreferenceDropdown from '@/components/PreferenceDorpdown/PreferenceDropdown';
+import { createAvatar } from '@/helpers/createAvatar';
+
+const defaultEvent: CreateEvent = {
+  title: '',
+  eventID: '',
+  creator: {
+    name: '',
+    avatar: '',
+  },
+  link: '',
+};
 
 function CreateEvent() {
-  const [eventTitle, setEventTitle] = React.useState('');
-  const [preferences, setPreferences] = React.useState<string[]>([]);
-  const eventID = Math.random().toString(36).substring(2, 15);
-  const { data, isLoading, isError } = useDemoApi();
-
-  const createEventMutation = useMutation<void, Error, EventData>(
-    async newEvent => {
-      const response = await fetch('/api/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newEvent),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create event');
-      }
-
-      await response.json();
-    },
-    {
-      onSuccess: () => {
-        console.log('Event created');
-        setEventTitle('');
-      },
-    }
-  );
-
-  // set preferences and event title in state after request returns
+  const [event, setEvent] = React.useState<CreateEvent>(defaultEvent);
+  const [checkedLocal, setCheckedLocal] = React.useState(false);
+  const createEventMutation = useMutation(createEvent);
+  const { isLoading } = createEventMutation;
+  // This useEffect checks if there is a middleground object in local storage that was created within the last 24 hours
+  // If there is, it will set the event state to that object to maintain the event state
   React.useEffect(() => {
-    if (data) {
-      setPreferences(data.preferences);
-      setEventTitle(data.title);
+    if (checkedLocal) return;
+    const middleground = localStorage.getItem('middleground');
+    if (middleground) {
+      const middlegroundObject = JSON.parse(middleground);
+      const timestamp = middlegroundObject.timestamp;
+      const currentTime = Date.now();
+      const timeDifference = currentTime - timestamp;
+      const oneDay = 1000 * 60 * 60 * 24;
+      console.log('middlegrounds object found');
+      if (timeDifference < oneDay) {
+        setEvent({
+          eventID: middlegroundObject.eventID,
+          creator: middlegroundObject.creator,
+          link: `/event/${middlegroundObject.eventID}`,
+          title: middlegroundObject.title || '',
+        });
+        setCheckedLocal(true);
+      } else {
+        localStorage.removeItem('middleground');
+        setCheckedLocal(true);
+      }
+    } else {
+      setCheckedLocal(true);
+      console.log('middlegrounds object not found');
     }
-  }, [data]);
+  }, []);
 
-  // wrap displayPreferences in a useCallback hook
-
-  const displayPreferences = React.useCallback(() => {
-    return preferences.map((preference, index): React.ReactElement => {
-      return (
-        <Tag
-          key={index}
-          size={'md'}
-          borderRadius="full"
-          variant="solid"
-          colorScheme="blue"
-        >
-          <TagLabel>{preference}</TagLabel>
-          <TagCloseButton
-            onClick={() => {
-              const newPreferences = preferences.filter(
-                (_preference, i) => i !== index
-              );
-              setPreferences(newPreferences);
-            }}
-          />
-        </Tag>
-      );
-    });
-  }, [preferences]);
-
-  // handle submit button
   const handleSubmit = async () => {
-    console.log(
-      'eventID submit',
-      eventID,
-      'preferences',
-      preferences,
-      'title',
-      eventTitle
-    );
-    // redirect to event page with eventID in URL
-    createEventMutation.mutate({
-      eventID,
-      preferences,
-      title: eventTitle,
-      link: '/event/' + eventID,
+    // remove any special characters in the creators name so that it can be used to create an avatar
+    const creatorName = event?.creator?.name?.replace(/\s/g, '') || 'taco';
+    const creatorAvatar = createAvatar(creatorName);
+
+    // If there is no eventID in the local storage middleground object, create a new eventID
+    const newEventID =
+      event.eventID || Math.random().toString(36).substring(2, 15);
+
+    // update the middleground object in local storage
+    const middleground = {
+      eventID: newEventID,
       creator: {
-        name: 'John Doe',
-        avatar: 'https://bit.ly/broken-link',
+        name: event.creator.name,
+        avatar: creatorAvatar,
       },
+      timestamp: Date.now(),
+      title: event?.title,
+    };
+    localStorage.setItem('middleground', JSON.stringify(middleground));
+
+    // create the event in the database using react-query and the events api
+    await createEventMutation.mutateAsync({
+      eventID: newEventID,
+      creator: {
+        name: event.creator.name,
+        avatar: creatorAvatar,
+      },
+      title: event?.title,
+      link: `/event/${newEventID}`,
     });
   };
-  console.log('data', data);
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
-  if (isError) {
-    return <div>Error fetching data</div>;
-  }
   return (
     <ResponsiveBox>
       <Navigation active="phone" />
-
-      {/* Form */}
       <BodyComponent>
         <Grid
           h="100%"
@@ -135,46 +118,51 @@ function CreateEvent() {
               <GridItem>
                 <Input
                   placeholder="Event title"
-                  defaultValue={eventTitle}
+                  value={event?.title}
                   onChange={e => {
-                    setEventTitle(e.target.value);
+                    const updateTitle = { ...event, title: e.target.value };
+                    setEvent(updateTitle);
                   }}
                 />
               </GridItem>
-              {/* Add additional preferences input fields here */}
               <GridItem>
-                {/* <PreferenceDropdown
-                  label="Select a preference"
-                  selectedPreferences={preferences}
-                  onSelect={handleSelect}
-                /> */}
+                <Input
+                  placeholder="Your name"
+                  value={event?.creator?.name}
+                  onChange={e => {
+                    const updateCreator = {
+                      ...event,
+                      creator: {
+                        name: e.target.value,
+                        avatar: event?.creator?.avatar || '',
+                      },
+                    };
+                    setEvent(updateCreator);
+                  }}
+                />
               </GridItem>
-              <GridItem>
-                <Container py={'10px'} px={0}>
-                  <Flex gap={4}>
-                    {preferences ? displayPreferences() : null}
-                  </Flex>
-                </Container>
-              </GridItem>
+              <GridItem></GridItem>
             </Grid>
           </GridItem>
           <GridItem>
-            <Button
-              colorScheme="blue"
-              size="lg"
-              w="100%"
-              onClick={() => {
-                console.log('create event button clicked');
-                handleSubmit();
-              }}
-            >
-              Create Event
-            </Button>
+            {isLoading ? (
+              <p>loading...</p>
+            ) : (
+              <Button
+                colorScheme="blue"
+                size="lg"
+                w="100%"
+                onClick={() => {
+                  console.log('create event button clicked');
+                  handleSubmit();
+                }}
+              >
+                Create Event
+              </Button>
+            )}
           </GridItem>
         </Grid>
       </BodyComponent>
-
-      {/* Continue button */}
     </ResponsiveBox>
   );
 }

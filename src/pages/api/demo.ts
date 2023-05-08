@@ -1,30 +1,15 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next';
-
-type Data = {
-  title: string;
-  link: string;
-  preferences: string[];
-  destinations: string[];
-  attendees: {
-    name: string;
-    avatar: string;
-  }[];
-  eventID: string;
-  creator: {
-    name: string;
-    avatar: string;
-  };
-};
+import { EventData } from '@/types/types';
 
 export default function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>
+  res: NextApiResponse<EventData>
 ) {
   res.status(200).json({
     title: 'The 5th Wave',
     link: 'www.google.com',
-    preferences: ['action', 'adventure', 'sci-fi'],
+    preferences: [{ name: 'Bar', type: 'bar' }],
     destinations: ['test', 'test2', 'test3'],
     attendees: [
       {

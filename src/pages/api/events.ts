@@ -1,16 +1,17 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { MongoClient } from 'mongodb';
+import { CreateEvent } from '@/types/types';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   if (req.method === 'POST') {
-    const { event } = req.body;
+    const { ...event }: CreateEvent = req.body;
 
     try {
       const client = await MongoClient.connect(
-        process.env.MONGODB_URI as string
+        'AIzaSyCRJAwlPE2C6w7baeEL1hVplDFtTlDOqJk' as string
       );
       const db = client.db();
       await db.collection('events').insertOne(event);
