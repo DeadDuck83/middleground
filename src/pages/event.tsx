@@ -1,25 +1,12 @@
 import React from 'react';
-import {
-  Flex,
-  Heading,
-  Input,
-  Button,
-  Tag,
-  TagCloseButton,
-  TagLabel,
-  Container,
-  Grid,
-  GridItem,
-} from '@chakra-ui/react';
+import { Heading, Input, Button, Grid, GridItem } from '@chakra-ui/react';
 import ResponsiveBox from '@/components/ResponsiveBox/ResponsiveBox';
 
-import InputWithButtonRow from '@/components/InputWithButtonRow/InputWithButtonRow';
 import { CreateEvent } from '@/types/types';
 import Navigation from '@/components/Navigation/Navigation';
 import { useMutation } from 'react-query';
 import BodyComponent from '@/components/BodyComponent/BodyComponent';
 import { createEvent } from '../lib/api';
-import PreferenceDropdown from '@/components/PreferenceDorpdown/PreferenceDropdown';
 import { createAvatar } from '@/helpers/createAvatar';
 
 const defaultEvent: CreateEvent = {

@@ -1,22 +1,9 @@
-/* eslint-disable jsx-a11y/aria-proptypes */
 'use client';
 import React, { FC, useState } from 'react';
 import {
-  Box,
-  Flex,
-  Heading,
-  IconButton,
-  Input,
-  Stack,
-  Text,
   Button,
-  AspectRatio,
-  RangeSliderTrack,
-  RangeSliderFilledTrack,
-  RangeSliderThumb,
   Grid,
   GridItem,
-  transition,
   Tag,
   TagCloseButton,
   TagLabel,
@@ -24,11 +11,8 @@ import {
 } from '@chakra-ui/react';
 import ResponsiveBox from '@/components/ResponsiveBox/ResponsiveBox';
 import Navigation from '@/components/Navigation/Navigation';
-import InputWithButtonRow from '@/components/InputWithButtonRow/InputWithButtonRow';
 import InputRange from '@/components/InputRange/InputRange';
 import BodyComponent from '@/components/BodyComponent/BodyComponent';
-import Image from 'next/image';
-import styles from './page.module.scss';
 import DestinationsContainer from '@/components/DestinationsContainer/DestinationsContainer';
 import GoogleMapComponent from '@/components/GoogleMapComponent/GoogleMapComponent';
 import PreferenceDropdown from '@/components/PreferenceDorpdown/PreferenceDropdown';
