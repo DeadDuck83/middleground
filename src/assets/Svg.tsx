@@ -27,6 +27,9 @@ export const Logo: React.FunctionComponent<React.SVGProps<SVGSVGElement>> = ({
   className = '',
 }) => (
   <svg
+    className={className}
+    height={height}
+    width={width}
     version="1.1"
     id="Layer_1"
     xmlns="http://www.w3.org/2000/svg"
@@ -75,6 +78,9 @@ export const Chat: React.FunctionComponent<React.SVGProps<SVGSVGElement>> = ({
   className = '',
 }) => (
   <svg
+    className={className}
+    height={height}
+    width={width}
     version="1.1"
     id="step2"
     xmlns="http://www.w3.org/2000/svg"
@@ -132,6 +138,9 @@ export const Map: React.FunctionComponent<React.SVGProps<SVGSVGElement>> = ({
   className = '',
 }) => (
   <svg
+    className={className}
+    height={height}
+    width={width}
     xmlns="http://www.w3.org/2000/svg"
     xmlSpace="preserve"
     viewBox="0 0 300 300"
@@ -158,6 +167,9 @@ export const Phone: React.FunctionComponent<React.SVGProps<SVGSVGElement>> = ({
   className = '',
 }) => (
   <svg
+    className={className}
+    height={height}
+    width={width}
     xmlns="http://www.w3.org/2000/svg"
     xmlSpace="preserve"
     viewBox="0 0 300 300"
