@@ -44,7 +44,7 @@ function CreateEvent() {
     });
   const [checkedLocal, setCheckedLocal] = React.useState(false);
   const createEventMutation = useMutation(createEvent);
-  const { isLoading } = createEventMutation;
+  const { isLoading, error } = createEventMutation;
   const router = useRouter();
   // This useEffect checks if there is a middleground object in local storage that was created within the last 24 hours
   // If there is, it will set the event state to that object to maintain the event state
@@ -125,6 +125,17 @@ function CreateEvent() {
 
     router.push(`/event/${newEventID}`);
   };
+
+  if (error) {
+    console.log(error);
+    // delete local storage middleground object
+    localStorage.removeItem('middleground');
+    return (
+      <div>
+        <p>ahh fuck, its all gone to shit</p>
+      </div>
+    );
+  }
 
   return (
     <ResponsiveBox>
