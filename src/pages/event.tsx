@@ -131,9 +131,9 @@ function CreateEvent() {
     // delete local storage middleground object
     localStorage.removeItem('middleground');
     return (
-      <div>
+      <Center height={400} width={'100%'}>
         <p>ahh fuck, its all gone to shit</p>
-      </div>
+      </Center>
     );
   }
 
