@@ -7,7 +7,7 @@ const DestinationsContainer: React.FC<DestinationVotingOptionsProps> = ({
   destinationVotingOptions,
   setDestinationVotingOptions,
 }) => {
-  console.log('destinationVotingOptions', destinationVotingOptions);
+  // console.log('destinationVotingOptions', destinationVotingOptions);
   // loop through destinationVotingOptions and create a Destination component for each
   const renderDestinations = (): JSX.Element[] | JSX.Element => {
     if (!destinationVotingOptions)

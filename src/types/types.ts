@@ -3,15 +3,19 @@ export type EventData = {
   link?: string;
   preferences?: { name: string; type: string }[];
   destinations?: string[] | null | undefined;
-  attendees: {
-    name: string;
-    avatar: string;
-  }[];
-  eventID: string;
   creator: {
     name: string;
     avatar: string;
+    lat: number;
+    lng: number;
   };
+  attendees: {
+    name: string;
+    avatar: string;
+    lat: number;
+    lng: number;
+  }[];
+  eventID: string;
 };
 
 export type CreateEvent = {
@@ -21,12 +25,22 @@ export type CreateEvent = {
   creator: {
     name: string;
     avatar: string;
+    lat: number;
+    lng: number;
   };
+  attendees: {
+    name: string;
+    avatar: string;
+    lat: number;
+    lng: number;
+  }[];
 };
 
 export type AddUser = {
   name: string;
   avatar: string;
+  lat: number;
+  lng: number;
 };
 
 export type AddPreferences = {

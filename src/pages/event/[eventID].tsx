@@ -1,6 +1,7 @@
 'use client';
 import React, { FC, useState } from 'react';
 import {
+  Avatar,
   Button,
   Grid,
   GridItem,
@@ -8,6 +9,8 @@ import {
   TagCloseButton,
   TagLabel,
   VStack,
+  Wrap,
+  WrapItem,
 } from '@chakra-ui/react';
 import ResponsiveBox from '@/components/ResponsiveBox/ResponsiveBox';
 import Navigation from '@/components/Navigation/Navigation';
@@ -16,6 +19,9 @@ import BodyComponent from '@/components/BodyComponent/BodyComponent';
 import DestinationsContainer from '@/components/DestinationsContainer/DestinationsContainer';
 import GoogleMapComponent from '@/components/GoogleMapComponent/GoogleMapComponent';
 import PreferenceDropdown from '@/components/PreferenceDorpdown/PreferenceDropdown';
+import { useQuery } from 'react-query';
+import axios from 'axios';
+import { useRouter } from 'next/router';
 
 interface PageProps {
   params: {
@@ -39,6 +45,15 @@ export interface DestinationVotingOptionsProps {
   setDestinationVotingOptions: any;
 }
 
+type EventProps = {
+  eventID: string;
+};
+
+const fetchEvent = async (eventID: string) => {
+  const { data } = await axios.get(`/api/event/${eventID}`);
+  return data.event;
+};
+
 const Mapping: FC<PageProps> = ({ params }) => {
   const [latitude, setLatitude] = useState(33.59502); // Initial latitude
   const [longitude, setLongitude] = useState(-117.659103); // Initial longitude
@@ -51,48 +66,64 @@ const Mapping: FC<PageProps> = ({ params }) => {
     []
   ); // Voting options (places)
   const [destination, setDestination] = useState(null); // Selected destination
+  const router = useRouter();
+  const currentEventID = router.query.eventID as string;
 
-  // set the destinationVotingOptions when the destinationOptions change
-  React.useEffect(() => {
-    if (destinationOptions) {
-      const newDestinationVotingOptions = destinationOptions.map(
-        (destinationOption: any) => {
-          return {
-            address: destinationOption.address,
-            name: destinationOption.name,
-            photo: destinationOption.photo,
-            votes: [],
-          };
-        }
-      );
-      console.log('newDestinationVotingOptions', newDestinationVotingOptions);
-      setDestinationVotingOptions(newDestinationVotingOptions);
+  // make a db query to return the event object based on the eventID in the params
+  const { data: eventRes, isLoading } = useQuery(
+    ['event', currentEventID],
+    () => fetchEvent(currentEventID),
+    {
+      refetchInterval: 5000,
     }
-  }, [destinationOptions]);
+  );
 
-  const displayPreferences = React.useCallback(() => {
-    return preferences?.map((preference, index): React.ReactElement => {
-      return (
-        <Tag
-          key={index}
-          size={'md'}
-          borderRadius="full"
-          variant="solid"
-          colorScheme="blue"
-        >
-          <TagLabel>{preference.name}</TagLabel>
-          <TagCloseButton
-            onClick={() => {
-              const newPreferences = preferences?.filter(
-                pref => pref.name !== preference.name
-              );
-              setPreferences(newPreferences);
-            }}
-          />
-        </Tag>
-      );
-    });
-  }, [preferences]);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  console.log('eventRes', eventRes);
+  // set the destinationVotingOptions when the destinationOptions change
+  // React.useEffect(() => {
+  //   if (destinationOptions) {
+  //     const newDestinationVotingOptions = destinationOptions.map(
+  //       (destinationOption: any) => {
+  //         return {
+  //           address: destinationOption.address,
+  //           name: destinationOption.name,
+  //           photo: destinationOption.photo,
+  //           votes: [],
+  //         };
+  //       }
+  //     );
+  //     console.log('newDestinationVotingOptions', newDestinationVotingOptions);
+  //     setDestinationVotingOptions(newDestinationVotingOptions);
+  //   }
+  // }, [destinationOptions]);
+
+  // const displayPreferences = React.useCallback(() => {
+  //   return preferences?.map((preference, index): React.ReactElement => {
+  //     return (
+  //       <Tag
+  //         key={index}
+  //         size={'md'}
+  //         borderRadius="full"
+  //         variant="solid"
+  //         colorScheme="blue"
+  //       >
+  //         <TagLabel>{preference.name}</TagLabel>
+  //         <TagCloseButton
+  //           onClick={() => {
+  //             const newPreferences = preferences?.filter(
+  //               pref => pref.name !== preference.name
+  //             );
+  //             setPreferences(newPreferences);
+  //           }}
+  //         />
+  //       </Tag>
+  //     );
+  //   });
+  // }, [preferences]);
 
   const handleSelect = (preference: PreferenceOption) => {
     // new preference array for state
@@ -137,7 +168,7 @@ const Mapping: FC<PageProps> = ({ params }) => {
                   setPreferences={setPreferences}
                   eventID={'demo'}
                 /> */}
-                {displayPreferences()}
+                {/* {displayPreferences()} */}
               </GridItem>
               <GridItem>
                 <InputRange radius={radius} setRadius={setRadius} />
@@ -146,16 +177,24 @@ const Mapping: FC<PageProps> = ({ params }) => {
             {!latitude || !longitude ? (
               <div>Loading...</div>
             ) : (
-              <GoogleMapComponent
-                latitude={latitude}
-                longitude={longitude}
-                radius={radius[0]}
-                // preferences={preferences}
-                setDestinationOptions={setDestinationOptions}
-              />
+              // <GoogleMapComponent
+              //   latitude={latitude}
+              //   longitude={longitude}
+              //   radius={radius[0]}
+              //   // preferences={preferences}
+              //   setDestinationOptions={setDestinationOptions}
+              // />
+              <p>test</p>
             )}
             <div>
-              <div>People joined</div>
+              <Wrap>
+                <WrapItem>
+                  <Avatar
+                    name={eventRes.creator.name}
+                    src={eventRes.creator.avatar}
+                  />
+                </WrapItem>
+              </Wrap>
             </div>
             <DestinationsContainer
               destinationVotingOptions={destinationVotingOptions}
