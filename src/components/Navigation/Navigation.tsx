@@ -34,8 +34,8 @@ const Navigation = ({ active }: Props) => {
         }
       >
         <Phone
-          width={150}
-          height={150}
+          width={120}
+          height={120}
           // className={active === 'phone' ? 'active' : ''}
         />
       </GridItem>
@@ -50,7 +50,7 @@ const Navigation = ({ active }: Props) => {
             : `  ${styles.iconContainer}`
         }
       >
-        <Chat width={150} height={150} />
+        <Chat width={120} height={120} />
       </GridItem>
       <GridItem
         justifySelf={'center'}
@@ -63,7 +63,7 @@ const Navigation = ({ active }: Props) => {
             : ` ${styles.iconContainer}`
         }
       >
-        <Map width={150} height={150} />
+        <Map width={120} height={120} />
       </GridItem>
     </Grid>
   );
