@@ -28,3 +28,13 @@
         }
     }
 }
+.centering {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    align-items: center;
+    justify-content: center;
+}
+
+.title {
+    text-align: center;
+}

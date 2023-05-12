@@ -28,7 +28,6 @@ const defaultEvent: CreateEvent = {
     lng: 0,
   },
   link: '',
-  attendees: [],
 };
 interface CreatorLocationProps {
   lat: number;
@@ -57,14 +56,16 @@ function CreateEvent() {
       const currentTime = Date.now();
       const timeDifference = currentTime - timestamp;
       const oneDay = 1000 * 60 * 60 * 24;
-      console.log('middlegrounds object found');
       if (timeDifference < oneDay) {
         setEvent({
           eventID: middlegroundObject.eventID,
           creator: middlegroundObject.creator,
           link: `/event/${middlegroundObject.eventID}`,
           title: middlegroundObject.title || '',
-          attendees: [middlegroundObject.creator],
+        });
+        setCreatorLocation({
+          lat: middlegroundObject.creator.lat,
+          lng: middlegroundObject.creator.lng,
         });
         setCheckedLocal(true);
       } else {
@@ -73,15 +74,10 @@ function CreateEvent() {
       }
     } else {
       setCheckedLocal(true);
-      console.log('middlegrounds object not found');
     }
   }, []);
 
   const handleSubmit = async () => {
-    // remove any special characters in the creators name so that it can be used to create an avatar
-    // const creatorName = event?.creator?.name?.replace(/\s/g, '') || 'taco';
-    // const creatorAvatar = createAvatar(creatorName);
-
     // If there is no eventID in the local storage middleground object, create a new eventID
     const newEventID =
       event.eventID || Math.random().toString(36).substring(2, 15);
@@ -109,14 +105,6 @@ function CreateEvent() {
         lat: creatorLocation.lat,
         lng: creatorLocation.lng,
       },
-      attendees: [
-        {
-          name: event.creator.name,
-          avatar: event.creator.avatar,
-          lat: creatorLocation.lat,
-          lng: creatorLocation.lng,
-        },
-      ],
       title: event?.title,
       link: `/event/${newEventID}`,
     });
@@ -220,7 +208,6 @@ function CreateEvent() {
               size="lg"
               w="100%"
               onClick={() => {
-                console.log('create event button clicked');
                 handleSubmit();
               }}
             >
@@ -229,7 +216,9 @@ function CreateEvent() {
           </GridItem>
         </Grid>
       </BodyComponent>
-      <LocationModal set={setCreatorLocation} data={creatorLocation} />
+      {creatorLocation.lat === 0 && (
+        <LocationModal set={setCreatorLocation} data={creatorLocation} />
+      )}
     </ResponsiveBox>
   );
 }

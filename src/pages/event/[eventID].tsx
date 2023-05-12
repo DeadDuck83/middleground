@@ -1,14 +1,11 @@
 'use client';
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import {
   Avatar,
   Button,
+  Center,
   Grid,
   GridItem,
-  Tag,
-  TagCloseButton,
-  TagLabel,
-  VStack,
   Wrap,
   WrapItem,
 } from '@chakra-ui/react';
@@ -18,19 +15,20 @@ import InputRange from '@/components/InputRange/InputRange';
 import BodyComponent from '@/components/BodyComponent/BodyComponent';
 import DestinationsContainer from '@/components/DestinationsContainer/DestinationsContainer';
 import GoogleMapComponent from '@/components/GoogleMapComponent/GoogleMapComponent';
-import PreferenceDropdown from '@/components/PreferenceDorpdown/PreferenceDropdown';
 import { useQuery } from 'react-query';
 import axios from 'axios';
 import { useRouter } from 'next/router';
+import { getCenterLocation } from '@/helpers/destinationCenterpoint';
 
 interface PageProps {
   params: {
     eventID: string;
   };
 }
-interface PreferenceOption {
-  name: string;
-  type: string;
+
+interface DestinationLocationProps {
+  lat: number;
+  lng: number;
 }
 
 export interface DestinationVotingOptionsProps {
@@ -45,98 +43,97 @@ export interface DestinationVotingOptionsProps {
   setDestinationVotingOptions: any;
 }
 
-type EventProps = {
-  eventID: string;
-};
-
 const fetchEvent = async (eventID: string) => {
   const { data } = await axios.get(`/api/event/${eventID}`);
   return data.event;
 };
 
-const Mapping: FC<PageProps> = ({ params }) => {
-  const [latitude, setLatitude] = useState(33.59502); // Initial latitude
-  const [longitude, setLongitude] = useState(-117.659103); // Initial longitude
+const Mapping: FC<PageProps> = () => {
+  // State variables
+  const [destinationCenterpointLocation, setDestinationCenterpointLocation] =
+    useState<DestinationLocationProps>();
   const [radius, setRadius] = useState<number[]>([20]); // Radius in miles
-  const [preferences, setPreferences] = useState<PreferenceOption[]>(); // Preferences (place types)
-  const [destinationOptions, setDestinationOptions] = useState([]); // Options (places)
-  const [destinationOptionsLoading, setDestinationOptionsLoading] =
-    useState(false); // Loading state for options
+  const [destinationOptions, setDestinationOptions] = useState<any>([]); // Destination options (places)
   const [destinationVotingOptions, setDestinationVotingOptions] = useState<any>(
     []
   ); // Voting options (places)
-  const [destination, setDestination] = useState(null); // Selected destination
   const router = useRouter();
   const currentEventID = router.query.eventID as string;
 
-  // make a db query to return the event object based on the eventID in the params
-  const { data: eventRes, isLoading } = useQuery(
-    ['event', currentEventID],
-    () => fetchEvent(currentEventID),
-    {
-      refetchInterval: 5000,
+  // Fetch event data
+  const {
+    data: eventRes,
+    isLoading,
+    error,
+  } = useQuery(['event', currentEventID], () => fetchEvent(currentEventID), {
+    // refetchInterval: 5000,
+    enabled: !!currentEventID, // <--- This line ensures the query only runs if currentEventID is not null or undefined.
+    // refetchOnWindowFocus: false,
+  });
+
+  // Calculate center location when event data is fetched
+  useEffect(() => {
+    if (eventRes?.creator && eventRes.attendees) {
+      const centerLocation = getCenterLocation([
+        eventRes.creator,
+        ...eventRes.attendees,
+      ]);
+      console.log('center location', centerLocation);
+      setDestinationCenterpointLocation(centerLocation);
     }
+  }, [eventRes?.creator, eventRes?.attendees]);
+
+  // When destination options are returned from the GoogleMapComponent with an array of places, set the destinationOptions state with an added variable of votes for each place
+  useEffect(() => {
+    if (destinationOptions) {
+      const destinationOptionsWithVotes = destinationOptions.map(
+        (destination: any) => {
+          return {
+            ...destination,
+            votes: [],
+          };
+        }
+      );
+
+      // Only update if necessary
+      if (
+        JSON.stringify(destinationOptionsWithVotes) !==
+        JSON.stringify(destinationVotingOptions)
+      ) {
+        console.log('update:', destinationOptionsWithVotes);
+        setDestinationVotingOptions(destinationOptionsWithVotes);
+      }
+    }
+  }, [destinationOptions, destinationVotingOptions]);
+
+  const displayAttendees = () => {
+    return eventRes?.attendees?.map(
+      (attendee: { name: string; avatar: string | undefined }) => {
+        return (
+          <WrapItem key={attendee.name}>
+            <Avatar name={attendee.name} src={attendee.avatar} />
+          </WrapItem>
+        );
+      }
+    );
+  };
+
+  console.log(
+    'Locations and event res: ',
+    destinationCenterpointLocation,
+    eventRes
   );
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  console.log('eventRes', eventRes);
-  // set the destinationVotingOptions when the destinationOptions change
-  // React.useEffect(() => {
-  //   if (destinationOptions) {
-  //     const newDestinationVotingOptions = destinationOptions.map(
-  //       (destinationOption: any) => {
-  //         return {
-  //           address: destinationOption.address,
-  //           name: destinationOption.name,
-  //           photo: destinationOption.photo,
-  //           votes: [],
-  //         };
-  //       }
-  //     );
-  //     console.log('newDestinationVotingOptions', newDestinationVotingOptions);
-  //     setDestinationVotingOptions(newDestinationVotingOptions);
-  //   }
-  // }, [destinationOptions]);
-
-  // const displayPreferences = React.useCallback(() => {
-  //   return preferences?.map((preference, index): React.ReactElement => {
-  //     return (
-  //       <Tag
-  //         key={index}
-  //         size={'md'}
-  //         borderRadius="full"
-  //         variant="solid"
-  //         colorScheme="blue"
-  //       >
-  //         <TagLabel>{preference.name}</TagLabel>
-  //         <TagCloseButton
-  //           onClick={() => {
-  //             const newPreferences = preferences?.filter(
-  //               pref => pref.name !== preference.name
-  //             );
-  //             setPreferences(newPreferences);
-  //           }}
-  //         />
-  //       </Tag>
-  //     );
-  //   });
-  // }, [preferences]);
-
-  const handleSelect = (preference: PreferenceOption) => {
-    // new preference array for state
-
-    // if the preference is not already in the array, add it
-    const newPreferences = preferences?.filter(
-      pref => pref.name !== preference.name
+  if (error) {
+    console.log(error);
+    // delete local storage middleground object
+    localStorage.removeItem('middleground');
+    return (
+      <Center height={400} width={'100%'}>
+        <p>ahh fuck, its all gone to shit</p>
+      </Center>
     );
-
-    if (!preferences?.some(p => p.type === preference.type)) {
-      setPreferences(newPreferences);
-    }
-  };
+  }
 
   return (
     <ResponsiveBox>
@@ -150,7 +147,7 @@ const Mapping: FC<PageProps> = ({ params }) => {
         >
           <GridItem>
             <Grid gridTemplateRows={'1fr auto'} alignItems={'center'}>
-              <GridItem>
+              {/* <GridItem>
                 <VStack spacing={4} alignItems="start">
                   <PreferenceDropdown
                     label="Select a preference"
@@ -158,42 +155,32 @@ const Mapping: FC<PageProps> = ({ params }) => {
                     onSelect={handleSelect}
                   />
                 </VStack>
-                {/* <InputWithButtonRow
-                  placeholder="Add Preference"
-                  // preferences={['test']}
-                  // setPreferences={() => {
-                  //   console.log(['test']);
-                  // }}
-                  preferences={preferences}
-                  setPreferences={setPreferences}
-                  eventID={'demo'}
-                /> */}
-                {/* {displayPreferences()} */}
-              </GridItem>
+              </GridItem> */}
               <GridItem>
                 <InputRange radius={radius} setRadius={setRadius} />
               </GridItem>
             </Grid>
-            {!latitude || !longitude ? (
+            {!destinationCenterpointLocation ? (
               <div>Loading...</div>
             ) : (
-              // <GoogleMapComponent
-              //   latitude={latitude}
-              //   longitude={longitude}
-              //   radius={radius[0]}
-              //   // preferences={preferences}
-              //   setDestinationOptions={setDestinationOptions}
-              // />
-              <p>test</p>
+              <GoogleMapComponent
+                latitude={destinationCenterpointLocation?.lat}
+                longitude={destinationCenterpointLocation?.lng}
+                radius={radius[0]}
+                // preferences={preferences}
+                setDestinationOptions={setDestinationOptions}
+              />
+              // <p>test</p>
             )}
             <div>
               <Wrap>
                 <WrapItem>
                   <Avatar
-                    name={eventRes.creator.name}
-                    src={eventRes.creator.avatar}
+                    name={eventRes?.creator?.name}
+                    src={eventRes?.creator?.avatar}
                   />
                 </WrapItem>
+                {displayAttendees()}
               </Wrap>
             </div>
             <DestinationsContainer

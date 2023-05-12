@@ -1,71 +1,86 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
 import { Chat, Map, Phone } from '@/assets/Svg';
-import { Grid, GridItem } from '@chakra-ui/react';
+import { Box, Grid, GridItem, Heading } from '@chakra-ui/react';
 import styles from './styles.module.scss';
 // write an enum for the active state
 interface Props {
   active: 'phone' | 'chat' | 'map';
 }
+// create a switch statement to determine which text to display as the title. When it's 'phone' display 'Phone', when it's 'chat' display 'Chat', and when it's 'map' display 'Map'.
+
+const titleText = (active: 'phone' | 'chat' | 'map') => {
+  switch (active) {
+    case 'phone':
+      return 'Create an Event';
+    case 'chat':
+      return 'Select a Destination';
+    case 'map':
+      return 'See you there!';
+  }
+};
 
 const Navigation = ({ active }: Props) => {
   return (
-    <Grid
-      className={styles.navigation}
-      alignItems="center"
-      // mb={4}
-      p={30}
-      gridTemplateColumns="1fr 1fr 1fr"
-      alignContent="center"
-      justifyContent="center"
-      bgColor={'purple.primary'}
-    >
-      <GridItem
-        justifySelf={'center'}
-        h={'100%'}
-        w={'100%'}
-        maxW={120}
-        className={
-          active === 'phone'
-            ? ` ${styles.iconContainerActive}`
-            : ` ${styles.iconContainer}`
-        }
+    <Box className={styles.centering} bgColor={'purple.primary'} p={30}>
+      <Grid
+        alignItems="center"
+        // mb={4}
+
+        gridTemplateColumns="1fr 1fr 1fr"
+        alignContent="center"
+        justifyContent="center"
       >
-        <Phone
-          width={120}
-          height={120}
-          // className={active === 'phone' ? 'active' : ''}
-        />
-      </GridItem>
-      <GridItem
-        justifySelf={'center'}
-        h={'100%'}
-        w={'100%'}
-        maxW={120}
-        className={
-          active === 'chat'
-            ? `${styles.iconContainerActive}`
-            : `  ${styles.iconContainer}`
-        }
-      >
-        <Chat width={120} height={120} />
-      </GridItem>
-      <GridItem
-        justifySelf={'center'}
-        h={'100%'}
-        w={'100%'}
-        maxW={120}
-        className={
-          active === 'map'
-            ? `${styles.iconContainerActive}`
-            : ` ${styles.iconContainer}`
-        }
-      >
-        <Map width={120} height={120} />
-      </GridItem>
-    </Grid>
+        <GridItem
+          justifySelf={'center'}
+          h={'100%'}
+          w={'100%'}
+          maxW={100}
+          className={
+            active === 'phone'
+              ? ` ${styles.iconContainerActive}`
+              : ` ${styles.iconContainer}`
+          }
+        >
+          <Phone
+            width={100}
+            height={100}
+            // className={active === 'phone' ? 'active' : ''}
+          />
+        </GridItem>
+        <GridItem
+          justifySelf={'center'}
+          h={'100%'}
+          w={'100%'}
+          maxW={100}
+          className={
+            active === 'chat'
+              ? `${styles.iconContainerActive}`
+              : `  ${styles.iconContainer}`
+          }
+        >
+          <Chat width={100} height={100} />
+        </GridItem>
+        <GridItem
+          justifySelf={'center'}
+          h={'100%'}
+          w={'100%'}
+          maxW={100}
+          className={
+            active === 'map'
+              ? `${styles.iconContainerActive}`
+              : ` ${styles.iconContainer}`
+          }
+        >
+          <Map width={100} height={100} />
+        </GridItem>
+      </Grid>
+      <Box p={2}>
+        <Heading color={'lemon.primary'} className={styles.title}>
+          {titleText(active)}
+        </Heading>
+      </Box>
+    </Box>
   );
 };
 

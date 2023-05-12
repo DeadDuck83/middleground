@@ -28,12 +28,6 @@ export type CreateEvent = {
     lat: number;
     lng: number;
   };
-  attendees: {
-    name: string;
-    avatar: string;
-    lat: number;
-    lng: number;
-  }[];
 };
 
 export type AddUser = {
