@@ -72,16 +72,16 @@ const Mapping: FC<PageProps> = () => {
   });
 
   // Calculate center location when event data is fetched
-  useEffect(() => {
-    if (eventRes?.creator && eventRes.attendees) {
-      const centerLocation = getCenterLocation([
-        eventRes.creator,
-        ...eventRes.attendees,
-      ]);
-      console.log('center location', centerLocation);
-      setDestinationCenterpointLocation(centerLocation);
-    }
-  }, [eventRes?.creator, eventRes?.attendees]);
+  // useEffect(() => {
+  //   if (eventRes?.creator && eventRes.attendees) {
+  //     const centerLocation = getCenterLocation([
+  //       eventRes.creator,
+  //       ...eventRes.attendees,
+  //     ]);
+  //     console.log('center location', centerLocation);
+  //     setDestinationCenterpointLocation(centerLocation);
+  //   }
+  // }, [eventRes?.creator, eventRes?.attendees]);
 
   // When destination options are returned from the GoogleMapComponent with an array of places, set the destinationOptions state with an added variable of votes for each place
   useEffect(() => {
