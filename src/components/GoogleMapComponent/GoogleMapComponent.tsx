@@ -19,7 +19,7 @@ interface GoogleMapComponentProps {
   latitude: number;
   longitude: number;
   radius: number;
-  preferences?: PreferenceOption[] | [];
+  // preferences?: PreferenceOption[] | [];
   setDestinationOptions: (destinationOptions: any) => void;
 }
 
@@ -27,7 +27,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   latitude,
   longitude,
   radius,
-  preferences = [],
+  // preferences = [],
   setDestinationOptions,
 }) => {
   const [markers, setMarkers] = useState<any[]>([]);
@@ -37,12 +37,12 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
     const location = new google.maps.LatLng(latitude, longitude);
 
     // loop through the preferences array and return the type in a string array
-    const preferencesArray = preferences.map(preference => preference.type);
+    // const preferencesArray = preferences.map(preference => preference.type);
 
     const request = {
       location: location,
       radius: radius * 1609.34, // convert miles to meters
-      types: preferencesArray, // array of place types (e.g., ['restaurant', 'cafe'])
+      types: ['restaurant'], // array of place types (e.g., ['restaurant', 'cafe'])
     };
 
     return new Promise<any[]>((resolve, reject) => {
@@ -82,7 +82,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         setMarkers(nearbyPlaces);
       })();
     }
-  }, [isGoogleApiLoaded, latitude, longitude, radius, preferences]);
+  }, [isGoogleApiLoaded, latitude, longitude, radius]);
 
   const mapStyles = {
     height: '100vh',

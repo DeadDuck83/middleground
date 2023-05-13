@@ -52,7 +52,7 @@ const Mapping: FC<PageProps> = () => {
   // State variables
   const [destinationCenterpointLocation, setDestinationCenterpointLocation] =
     useState<DestinationLocationProps>();
-  const [radius, setRadius] = useState<number[]>([20]); // Radius in miles
+  const [radius, setRadius] = useState<number[]>([2]); // Radius in miles
   const [destinationOptions, setDestinationOptions] = useState<any>([]); // Destination options (places)
   const [destinationVotingOptions, setDestinationVotingOptions] = useState<any>(
     []
@@ -72,16 +72,16 @@ const Mapping: FC<PageProps> = () => {
   });
 
   // Calculate center location when event data is fetched
-  // useEffect(() => {
-  //   if (eventRes?.creator && eventRes.attendees) {
-  //     const centerLocation = getCenterLocation([
-  //       eventRes.creator,
-  //       ...eventRes.attendees,
-  //     ]);
-  //     console.log('center location', centerLocation);
-  //     setDestinationCenterpointLocation(centerLocation);
-  //   }
-  // }, [eventRes?.creator, eventRes?.attendees]);
+  useEffect(() => {
+    if (eventRes?.creator && eventRes.attendees) {
+      const centerLocation = getCenterLocation([
+        eventRes.creator,
+        ...eventRes.attendees,
+      ]);
+      console.log('center location', centerLocation);
+      setDestinationCenterpointLocation(centerLocation);
+    }
+  }, [eventRes?.creator, eventRes?.attendees]);
 
   // When destination options are returned from the GoogleMapComponent with an array of places, set the destinationOptions state with an added variable of votes for each place
   useEffect(() => {
@@ -96,15 +96,11 @@ const Mapping: FC<PageProps> = () => {
       );
 
       // Only update if necessary
-      if (
-        JSON.stringify(destinationOptionsWithVotes) !==
-        JSON.stringify(destinationVotingOptions)
-      ) {
-        console.log('update:', destinationOptionsWithVotes);
-        setDestinationVotingOptions(destinationOptionsWithVotes);
-      }
+
+      console.log('update:', destinationOptionsWithVotes);
+      setDestinationVotingOptions(destinationOptionsWithVotes);
     }
-  }, [destinationOptions, destinationVotingOptions]);
+  }, [destinationOptions]);
 
   const displayAttendees = () => {
     return eventRes?.attendees?.map(

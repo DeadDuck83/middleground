@@ -11,7 +11,7 @@ const InputRange: React.FC<Props> = ({ radius, setRadius }) => {
   // const [state, setState] = useState<number[]>([50]);
 
   const STEP = 0.1;
-  const MIN = 10;
+  const MIN = 2;
   const MAX = 80;
 
   return (
