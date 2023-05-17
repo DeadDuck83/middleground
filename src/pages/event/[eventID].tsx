@@ -158,6 +158,7 @@ const Mapping: FC<PageProps> = () => {
     console.log(error);
     // delete local storage middleground object
     localStorage.removeItem('middleground');
+    localStorage.removeItem('middlegroundsattendee');
     return (
       <Center height={400} width={'100%'}>
         <p>ahh fuck, its all gone to shit</p>
@@ -167,6 +168,7 @@ const Mapping: FC<PageProps> = () => {
   // useEffect(() => {
   //   newAttendeeModal();
   // });
+  console.log(userRole, 'user role');
 
   return (
     <ResponsiveBox>
