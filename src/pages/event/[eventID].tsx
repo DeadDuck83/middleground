@@ -112,7 +112,7 @@ const Mapping: FC<PageProps> = () => {
   }, [destinationOptions]);
 
   useEffect(() => {
-    if (eventRes) {
+    if (eventRes && !isLoading) {
       const [role, data] = checkLocalStorage(onOpen);
       console.log('data: ', data);
       setUserRole(role);
