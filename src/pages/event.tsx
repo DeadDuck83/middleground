@@ -77,6 +77,31 @@ function CreateEvent() {
     }
   }, []);
 
+  const locationAvailable = () => {
+    if (creatorLocation.lat === 0) {
+      return (
+        <Button
+          size="sm"
+          colorScheme="blue"
+          onClick={() => {
+            // request location again
+            setCreatorLocation({ lat: 0, lng: 0 });
+          }}
+        >
+          Share your location
+        </Button>
+      );
+    } else {
+      return (
+        <p>
+          <span role="img" aria-label="checkmark">
+            ✅ Location shared
+          </span>
+        </p>
+      );
+    }
+  };
+
   const handleSubmit = async () => {
     // If there is no eventID in the local storage middleground object, create a new eventID
     const newEventID =
@@ -178,12 +203,7 @@ function CreateEvent() {
                     setEvent(updateCreator);
                   }}
                 />
-                <div>
-                  <p>
-                    {creatorLocation.lat} {creatorLocation.lng}
-                    {event?.creator?.name}
-                  </p>
-                </div>
+                <div>{locationAvailable()}</div>
               </GridItem>
               <GridItem>
                 <Center>

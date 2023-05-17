@@ -45,3 +45,14 @@ export default async function handler(
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
+
+
+// const mutation = useMutation(
+//   (data: { eventID: string; attendee: AddUser }) =>
+//     fetch('/api/event/addAttendee', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify(data),
+//     }),

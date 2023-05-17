@@ -6,8 +6,10 @@ import {
   Center,
   Grid,
   GridItem,
+  SkeletonCircle,
   Wrap,
   WrapItem,
+  useDisclosure,
 } from '@chakra-ui/react';
 import ResponsiveBox from '@/components/ResponsiveBox/ResponsiveBox';
 import Navigation from '@/components/Navigation/Navigation';
@@ -19,7 +21,12 @@ import { useQuery } from 'react-query';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import { getCenterLocation } from '@/helpers/destinationCenterpoint';
+import LocationModal from '@/components/LocationModal/LocationModal';
+import AddAttendeeModal from '@/components/AddAttendee/AddAttendee';
+import { Role } from '@/enums/Role';
+import { checkLocalStorage } from '@/helpers/checkLocalStorage';
 
+// TODO: remove hardcoded preferences and radius
 interface PageProps {
   params: {
     eventID: string;
@@ -49,14 +56,15 @@ const fetchEvent = async (eventID: string) => {
 };
 
 const Mapping: FC<PageProps> = () => {
-  // State variables
+  const [userRole, setUserRole] = useState<Role>(Role.None);
   const [destinationCenterpointLocation, setDestinationCenterpointLocation] =
     useState<DestinationLocationProps>();
-  const [radius, setRadius] = useState<number[]>([2]); // Radius in miles
+  // const [radius, setRadius] = useState<number[]>([2]); // Radius in miles
   const [destinationOptions, setDestinationOptions] = useState<any>([]); // Destination options (places)
   const [destinationVotingOptions, setDestinationVotingOptions] = useState<any>(
     []
   ); // Voting options (places)
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
   const currentEventID = router.query.eventID as string;
 
@@ -65,6 +73,7 @@ const Mapping: FC<PageProps> = () => {
     data: eventRes,
     isLoading,
     error,
+    refetch,
   } = useQuery(['event', currentEventID], () => fetchEvent(currentEventID), {
     // refetchInterval: 5000,
     enabled: !!currentEventID, // <--- This line ensures the query only runs if currentEventID is not null or undefined.
@@ -78,8 +87,9 @@ const Mapping: FC<PageProps> = () => {
         eventRes.creator,
         ...eventRes.attendees,
       ]);
-      console.log('center location', centerLocation);
       setDestinationCenterpointLocation(centerLocation);
+    } else {
+      console.log('no center location');
     }
   }, [eventRes?.creator, eventRes?.attendees]);
 
@@ -97,10 +107,17 @@ const Mapping: FC<PageProps> = () => {
 
       // Only update if necessary
 
-      console.log('update:', destinationOptionsWithVotes);
       setDestinationVotingOptions(destinationOptionsWithVotes);
     }
   }, [destinationOptions]);
+
+  useEffect(() => {
+    if (eventRes) {
+      const [role, data] = checkLocalStorage(onOpen);
+      console.log('data: ', data);
+      setUserRole(role);
+    }
+  }, [eventRes]);
 
   const displayAttendees = () => {
     return eventRes?.attendees?.map(
@@ -114,11 +131,28 @@ const Mapping: FC<PageProps> = () => {
     );
   };
 
-  console.log(
-    'Locations and event res: ',
-    destinationCenterpointLocation,
-    eventRes
-  );
+  // const newAttendeeModal = () => {
+  //   if (typeof window === 'undefined') return null;
+  //   // check local storage to see if there is a middleground object with an eventID
+  //   const middleground = localStorage.getItem('middleground') as string | null;
+  //   if (middleground) {
+  //     const middlegroundObject = JSON.parse(middleground);
+  //     const timestamp = middlegroundObject.timestamp;
+  //     const currentTime = Date.now();
+  //     const timeDifference = currentTime - timestamp;
+  //     const oneDay = 1000 * 60 * 60 * 24;
+  //     if (timeDifference < oneDay) {
+  //       return null;
+  //     }
+  //     // if the creator name in the local storage is the same as the creator name in the event res, return null
+  //     if (middlegroundObject.creator.name === eventRes?.creator?.name) {
+  //       return null;
+  //     }
+  //   }
+  //   console.log('show modal');
+  //   onOpen();
+  //   return;
+  // };
 
   if (error) {
     console.log(error);
@@ -130,9 +164,18 @@ const Mapping: FC<PageProps> = () => {
       </Center>
     );
   }
+  // useEffect(() => {
+  //   newAttendeeModal();
+  // });
 
   return (
     <ResponsiveBox>
+      <AddAttendeeModal
+        isOpen={isOpen}
+        onClose={onClose}
+        currentEventID={currentEventID}
+        refetch={refetch}
+      />
       <Navigation active="chat" />
       <BodyComponent>
         <Grid
@@ -152,17 +195,17 @@ const Mapping: FC<PageProps> = () => {
                   />
                 </VStack>
               </GridItem> */}
-              <GridItem>
+              {/* <GridItem>
                 <InputRange radius={radius} setRadius={setRadius} />
-              </GridItem>
+              </GridItem> */}
             </Grid>
             {!destinationCenterpointLocation ? (
-              <div>Loading...</div>
+              <div>Waiting for others to join so we can have a mid-point.</div>
             ) : (
               <GoogleMapComponent
                 latitude={destinationCenterpointLocation?.lat}
                 longitude={destinationCenterpointLocation?.lng}
-                radius={radius[0]}
+                radius={10} // hardcoded for now
                 // preferences={preferences}
                 setDestinationOptions={setDestinationOptions}
               />
@@ -177,6 +220,12 @@ const Mapping: FC<PageProps> = () => {
                   />
                 </WrapItem>
                 {displayAttendees()}
+                {!destinationCenterpointLocation && (
+                  <WrapItem gap={'5px'}>
+                    <SkeletonCircle size="12" pr={'5px'} />
+                    <SkeletonCircle size="12" />
+                  </WrapItem>
+                )}
               </Wrap>
             </div>
             <DestinationsContainer

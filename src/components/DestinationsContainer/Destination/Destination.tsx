@@ -83,7 +83,7 @@ function Destination({
       >
         <Image
           src={photo}
-          alt="Caffe Latte"
+          alt={name}
           width={100}
           height={100}
           className={styles.image}

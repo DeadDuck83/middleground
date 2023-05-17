@@ -58,7 +58,8 @@ const LocationModal = ({ data, set }: LocationModalProps) => {
           <ModalHeader>Share your location</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            To provide the best experience, we need your location information.
+            Really, the only way to use this is to allow us to use your
+            location. We promise we won&apos;t do anything weird with it. 😉
           </ModalBody>
 
           <ModalFooter>
