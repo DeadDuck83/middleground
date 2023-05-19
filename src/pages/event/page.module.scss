@@ -6,3 +6,23 @@
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
+.attendeeName {
+    font-size: 8px;
+    color: red;
+}
+
+.creatorName {
+    font-size: 8px;
+    color: blue;
+}
+
+.creatorPill {
+    background-color: blue;
+    color: white;
+    font-size: 8px;
+    padding: 2px;
+    border-radius: 5px;
+    position: absolute;
+    top: -15px;
+    z-index: -1;
+}

@@ -60,6 +60,40 @@ const AddAttendeeModal: React.FC<AddAttendeeModalProps> = ({
     );
   };
 
+
+  if (typeof navigator !== 'undefined' && navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(successFunction, errorFunction);
+  } else {
+    // Browser doesn't support Geolocation or running in non-browser environment
+    displayMessage(
+      'Your browser does not support Geolocation or you are running in a non-browser environment.'
+    );
+  }
+
+  function successFunction(position: GeolocationPosition) {
+    const lat: number = position.coords.latitude;
+    const lon: number = position.coords.longitude;
+    setLocation({
+      lat: lat,
+      lng: lon,
+    });
+  }
+
+  function errorFunction() {
+    displayMessage(
+      'It seems like Geolocation, which is required for this page, is not enabled in your browser. Please use the following steps to enable it: \nFor Chrome:\nSettings > Privacy and Security > Site Settings > Location\nFor Safari:\nSettings > Privacy > Location Services > Safari Websites'
+    );
+  }
+
+  function displayMessage(message: string) {
+    if (typeof alert !== 'undefined') {
+      alert(message);
+    } else {
+      console.log(message);
+      // Or handle non-browser environment situation here
+    }
+  }
+
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(position => {
@@ -132,19 +166,22 @@ const AddAttendeeModal: React.FC<AddAttendeeModalProps> = ({
                 }}
               />
             </FormControl>
-            <FormControl id="location" isRequired>
-              <FormLabel>Location</FormLabel>
-              <Input
-                value={location?.lat || ''}
-                placeholder="Latitude"
-                readOnly
-              />
-              <Input
-                value={location?.lng || ''}
-                placeholder="Longitude"
-                readOnly
-              />
-            </FormControl>
+
+            <Box>
+              {location.lat !== 0 ? (
+                <p>
+                  <span role="img" aria-label="checkmark">
+                    ✅ Location shared
+                  </span>
+                </p>
+              ) : (
+                <p>
+                  <span role="img" aria-label="checkmark">
+                    ❌ Location not shared
+                  </span>
+                </p>
+              )}
+            </Box>
             {!location && (
               <Box
                 display="flex"
@@ -157,7 +194,11 @@ const AddAttendeeModal: React.FC<AddAttendeeModalProps> = ({
             )}
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" type="submit" isDisabled={!location}>
+            <Button
+              colorScheme="blue"
+              type="submit"
+              isDisabled={!location || location.lat === 0}
+            >
               Add Attendee
             </Button>
           </ModalFooter>

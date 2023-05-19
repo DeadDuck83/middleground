@@ -2,11 +2,14 @@
 import React, { FC, useState, useEffect } from 'react';
 import {
   Avatar,
+  Box,
   Button,
   Center,
   Grid,
   GridItem,
+  HStack,
   SkeletonCircle,
+  VStack,
   Wrap,
   WrapItem,
   useDisclosure,
@@ -25,6 +28,8 @@ import LocationModal from '@/components/LocationModal/LocationModal';
 import AddAttendeeModal from '@/components/AddAttendee/AddAttendee';
 import { Role } from '@/enums/Role';
 import { checkLocalStorage } from '@/helpers/checkLocalStorage';
+import styles from './page.module.scss';
+import ShareButton from '@/components/ShareButton/ShareButton';
 
 // TODO: remove hardcoded preferences and radius
 interface PageProps {
@@ -124,35 +129,34 @@ const Mapping: FC<PageProps> = () => {
       (attendee: { name: string; avatar: string | undefined }) => {
         return (
           <WrapItem key={attendee.name}>
-            <Avatar name={attendee.name} src={attendee.avatar} />
+            <VStack>
+              <Avatar name={attendee.name} src={attendee.avatar} />
+              <span className={styles.attendeeName}>{attendee.name}</span>
+            </VStack>
           </WrapItem>
         );
       }
     );
   };
 
-  // const newAttendeeModal = () => {
-  //   if (typeof window === 'undefined') return null;
-  //   // check local storage to see if there is a middleground object with an eventID
-  //   const middleground = localStorage.getItem('middleground') as string | null;
-  //   if (middleground) {
-  //     const middlegroundObject = JSON.parse(middleground);
-  //     const timestamp = middlegroundObject.timestamp;
-  //     const currentTime = Date.now();
-  //     const timeDifference = currentTime - timestamp;
-  //     const oneDay = 1000 * 60 * 60 * 24;
-  //     if (timeDifference < oneDay) {
-  //       return null;
-  //     }
-  //     // if the creator name in the local storage is the same as the creator name in the event res, return null
-  //     if (middlegroundObject.creator.name === eventRes?.creator?.name) {
-  //       return null;
-  //     }
-  //   }
-  //   console.log('show modal');
-  //   onOpen();
-  //   return;
-  // };
+  const displayButtonForCreator = (role: Role, event: any) => {
+    if (role === Role.Creator) {
+      return (
+        <Button
+          colorScheme="blue"
+          size="lg"
+          w="100%"
+          onClick={() => {
+            console.log('create event button clicked');
+          }}
+        >
+          Create event
+        </Button>
+      );
+    } else {
+      return <p>Waiting for the bum to select the location</p>;
+    }
+  };
 
   if (error) {
     console.log(error);
@@ -214,12 +218,18 @@ const Mapping: FC<PageProps> = () => {
               // <p>test</p>
             )}
             <div>
-              <Wrap>
-                <WrapItem>
-                  <Avatar
-                    name={eventRes?.creator?.name}
-                    src={eventRes?.creator?.avatar}
-                  />
+              <Wrap py={5} spacing={'20px'}>
+                <WrapItem alignSelf={'flex-start'}>
+                  <VStack>
+                    <Avatar
+                      name={eventRes?.creator?.name}
+                      src={eventRes?.creator?.avatar}
+                    />
+                    <span className={styles.creatorName}>
+                      {eventRes?.creator?.name}
+                    </span>
+                    <span className={styles.creatorPill}>Creator</span>
+                  </VStack>
                 </WrapItem>
                 {displayAttendees()}
                 {!destinationCenterpointLocation && (
@@ -230,23 +240,17 @@ const Mapping: FC<PageProps> = () => {
                 )}
               </Wrap>
             </div>
+            <Box py={4}>
+              <ShareButton eventID={currentEventID} />
+            </Box>
             <DestinationsContainer
               destinationVotingOptions={destinationVotingOptions}
               setDestinationVotingOptions={setDestinationVotingOptions}
             />
           </GridItem>
-          <GridItem>
-            <Button
-              colorScheme="blue"
-              size="lg"
-              w="100%"
-              onClick={() => {
-                console.log('create event button clicked');
-              }}
-            >
-              Next button
-            </Button>
-          </GridItem>
+
+          <GridItem>{displayButtonForCreator(userRole, eventRes)}</GridItem>
+          <GridItem></GridItem>
         </Grid>
       </BodyComponent>
     </ResponsiveBox>
